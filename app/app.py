@@ -14,7 +14,7 @@ from views.index import index
 
 
 app = Flask(__name__)
-app.config.from_object("config.DevelopmentConfig")
+app.config.from_object("config.ProductionConfig")
 
 
 app.register_blueprint(index)

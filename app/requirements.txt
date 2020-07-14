@@ -1,8 +1,8 @@
-requests==2.13.0
-pytz==2017.2
+requests
+pytz
 Werkzeug==0.16
 Flask-Mail
-Flask==0.12.1
+Flask
 flask_jwt_extended
 pymongo==3.5.1
 flask_mongoengine
