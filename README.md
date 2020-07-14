@@ -27,7 +27,7 @@ To run this project first obtain a API key from [openweather](https://openweathe
 $ docker build -t weather-flask . # create "weather-flask" docker image
 $ docker-compose up # start project containers
 ```
-Now go to `localhost:5000/` in order to use the web-app, and to `localhost:1080/` in order to check the (fake) email send by the web-app.
+Now go to `localhost:5000/` in order to use the web-app, and to `localhost:1080/` in order to check the email send by the web-app.
 
 ## Screenshots
 <img src="docs/images/screenshot_1.gif" width="700">
