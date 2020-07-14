@@ -1,0 +1,145 @@
+<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+<h1 style="text-align:center">Compare the Weather of 2 Cities:</h1>
+                               
+<form class="pure-form" action="/api/compare" method="POST" id="form">
+    <input type="text" name="city1" id="city1" value="{{ request.form['city1'] }}" placeholder="Enter city 1"/>
+    <input type="text" name="city2" id="city2" value="{{ request.form['city2'] }}" placeholder="Enter city 2"/>
+	<button type="submit" class="pure-button pure-button-primary">Show Weather</button>
+</form>
+
+{% if error %}
+    <p class='alert'>{{ error }}</p>
+
+{% elif data %}
+    <table class="pure-table">
+        <tr>
+            <th>City</th>
+            <th>Description</th>
+            <th>Temperature</th>
+            <th>Humidity</th>
+            <th>Sunrise</th>
+            <th>Sunset</th>
+        </tr>
+        {% for d in data %}
+            <tr>
+                <td>{{ d['name'] }} ({{ d['sys']['country'] }})</td>
+                <td>{{ d['weather'][0]['description'] }}</td>
+                <td>{{ d['main']['temp'] }} °C</td>
+                <td>{{ d['main']['humidity'] }}</td>
+                <td>{{ time(d['sys']['sunrise'], d['sys']['country'], d['name']) }}</td>
+                <td>{{ time(d['sys']['sunset'], d['sys']['country'], d['name']) }}</td>
+            </tr>		
+        {% endfor %}
+    </table>
+
+<hr>
+
+<div align="center">
+    <button id="log" style="align:center" class="pure-button pure-button-primary"></button>
+</div>
+<br>
+{% endif %}
+
+
+
+{% if adv_data %}
+<div id="advanced_info">
+<table class="pure-table">
+    <tr>
+            <th colspan="2"></th>
+            <th>Description</th>
+            <th>Temperature</th>
+            <th>Feels like</th>
+            <th>Humidity</th>
+            <th>Pressure</th>
+        </tr>
+
+    {% for i in range(adv_data[0]["list"] | length) %}
+    <tr>
+        <th rowspan="2">{{ adv_data[0]["list"][i]["dt_txt"] }}</th>
+        <td>{{ request.form['city1'] }}</td>
+        <td>{{ adv_data[0]["list"][i]["weather"][0]["description"] }}</td>
+        <td>{{ adv_data[0]["list"][i]["main"]["temp"] }} °C</td>
+        <td>{{ adv_data[0]["list"][i]["main"]["feels_like"] }} °C</td>
+        <td>{{ adv_data[0]["list"][i]["main"]["humidity"] }}</td>
+        <td>{{ adv_data[0]["list"][i]["main"]["pressure"] }} mbar</td>
+    </tr>
+    <tr>
+        <td>{{ request.form['city2'] }}</td>
+        <td>{{ adv_data[1]["list"][i]["weather"][0]["description"] }}</td>
+        <td>{{ adv_data[1]["list"][i]["main"]["temp"] }} °C</td>
+        <td>{{ adv_data[1]["list"][i]["main"]["feels_like"] }} °C</td>
+        <td>{{ adv_data[1]["list"][i]["main"]["humidity"] }}</td>
+        <td>{{ adv_data[1]["list"][i]["main"]["pressure"] }} mbar</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+
+
+
+<script type="text/javascript">
+
+$('button#log').bind('click', function() {
+        $("div#advanced_info").remove();
+        $('button#log').text("Login/Signup for more info");
+        $.ajax({
+           type: "POST",
+           url: "/token/remove",     
+        });
+        $('button#log').bind('click', function() {
+            city1 = $("input#city1").val()
+            city2 = $("input#city2").val()
+            document.location.href = "/api/login?city1=" + city1 + "&city2=" + city2;
+            });
+});
+$('button#log').text("Logout for less info");
+
+</script>
+
+
+{% else %}
+<script type="text/javascript">
+
+$('button#log').bind('click', function() {
+        city1 = $("input#city1").val()
+        city2 = $("input#city2").val()
+        document.location.href = "/api/login?city1=" + city1 + "&city2=" + city2;
+});
+$('button#log').text("Login/Signup for more info");
+
+</script>
+{% endif %}
+
+
+
+{% if data %}
+<script type="text/javascript">
+
+function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        vars[key] = value;
+    });
+    return vars;
+}
+
+if (getUrlVars()["city1"] && getUrlVars()["city2"]) {
+    $("input#city1").val(getUrlVars()["city1"])
+    $("input#city2").val(getUrlVars()["city2"])
+    document.getElementById("form").submit(); 
+}
+
+if ($("input#city1").val() != getUrlVars()["city1"] && getUrlVars()["city1"]) {
+    $("input#city1").val(getUrlVars()["city1"])
+}
+
+if ($("input#city2").val() != getUrlVars()["city2"] && getUrlVars()["city2"]) {
+    $("input#city2").val(getUrlVars()["city2"])
+}
+
+</script>
+{% endif %}

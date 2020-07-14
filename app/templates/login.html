@@ -1,0 +1,152 @@
+<link rel="stylesheet" href="/static/login_style.css" type="text/css">
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+function ajax_req_login() {
+    $.ajax({
+         type: "POST",
+         url: "/token/auth",
+         headers: {'Content-Type':'application/json'},
+         data: JSON.stringify({
+              username: document.getElementById('text').value,
+              password: document.getElementById('psw').value
+          }),
+         success: is_user_correct,
+         error: function(request, error) {
+              if (request.status == 401) {
+                  $("div#error").html("<p>wrong mail or password</p>")
+              } else {
+                  alert('An error occurred during ajax-request\n');
+              }
+          }
+    });
+  }
+
+  function is_user_correct(data) {
+          if(data.login) { 
+              window.location = "/api/compare?city1=" + getUrlVars()["city1"] + "&city2=" + getUrlVars()["city2"]
+          }
+  }
+</script>
+
+
+
+<script type="text/javascript">
+function getUrlVars() {
+  var vars = {};
+  var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+      vars[key] = value;
+  });
+  return vars;
+}
+</script>
+
+
+<div class="login">
+  <div class="login-screen">
+    <div class="app-title">
+      <h1 id="title">Login</h1>
+    </div>
+
+    <div id="error" style="text-align: center;color: red;"></div>
+
+
+    <div class="login-form">
+      <form id="form">
+        <div id="group" class="control-group">
+          <input type="text" id="text" class="login-field" value="{{ request.form['username'] }}" placeholder="mail" name="username" autofocus="true">
+          <label class="login-field-icon fui-user" for="login-name"></label>
+        </div>
+        <div class="control-group">
+          <input id="psw" type="password" class="login-field" value="{{ request.form['password'] }}" placeholder="password" name="password">
+          <label class="login-field-icon fui-lock" for="login-pass"></label>
+        </div>
+
+        <input id="access" type="submit" value="Log in" class="btn btn-primary btn-large btn-block">
+
+        <p style="text-align:center;" id="msg">Don't have an account? <a href='/api/login?signup=True&city1={{ request.args["city1"] }}&city2={{ request.args["city2"] }}'>Sign up<a/></p>
+
+      </form>
+    </div>
+    
+
+    <div class="login-form" hidden="true" id="to-enable">
+      <div>
+        <p>We send you an email with a 6 character code, insert it below to continue.</p>
+        <input id="otp" class="form-input" placeholder="Enter the 6 character code">
+      </div>
+    <button id="verify" class="btn btn-primary btn-large btn-block">Verify</button>
+    </div>
+  </div>
+</div>
+
+
+
+{% if data["signup"] %}
+<script type="text/javascript">
+
+  $("h1#title").text('Signup');
+  $("input#access").val('Signup');
+  $("form#form").attr('action',"javascript:ajax_req_signup(verify_otp)");
+  $("form#form").attr('method',"");
+  $("p#msg").html('Have an account? <a href="/api/login?city1=' + getUrlVars()["city1"] + '&city2=' + getUrlVars()["city2"] + '">Log in</a>');
+
+
+  function ajax_req_signup(callback) {
+    $.ajax({
+         type: "POST",
+         url: "/api/signup",
+         data: {
+              email: document.getElementById('text').value,
+              password: document.getElementById('psw').value
+          },
+         success: callback,
+         error: function(request, error) {
+              if (request.status == 400) {
+                $("div#error").html("<p>" + JSON.parse(request.responseText)["error"] + "</p>")
+              } else {
+              alert('An error occurred during ajax-request');
+            }
+          }
+  });}
+
+
+  function verify_otp(data) {
+      $('form#form').hide()
+      $('div#to-enable').attr('hidden', false)
+      $("div#error").html("")
+      $('button#verify').bind('click', function() {
+          server_data = JSON.parse(data)
+          if (server_data["otp"] == document.getElementById('otp').value) {
+              $.ajax({
+                 type: "POST",
+                 url: "/api/create_user",
+                 data: {
+                    username: $('input#text').val(),
+                    password: $('input#psw').val(),
+                    otp: $('input#otp').val()
+                  },
+                 success: ajax_req_login,
+                 error: function(request, error) {
+                      alert('An error occurred during ajax-request\n');
+                  }
+              });
+          } else {
+              alert('An error occurred during ajax-request\n');
+          }
+      });
+  }
+
+</script>
+
+
+
+{% else %}
+<script type="text/javascript">
+
+  $("form#form").attr('action',"javascript:ajax_req_login()");
+  $("form#form").attr('method',"");
+
+</script>
+{% endif %}

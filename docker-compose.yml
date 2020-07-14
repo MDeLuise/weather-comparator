@@ -1,0 +1,18 @@
+version: '3'
+services:
+    mail:
+        image: schickling/mailcatcher
+        ports:
+        - 1080:1080
+    db:
+        image: mongo
+        volumes:
+        - "./mongo:/data/db"
+    web:
+        image: weather-flask
+        ports:
+        - 5000:5000
+        volumes:
+        - "./app:/app"
+        env_file:
+        - vars.env
