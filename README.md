@@ -30,4 +30,4 @@ $ docker-compose up # start project containers
 Now go to `localhost:5000/` in order to use the web-app, and to `localhost:1080/` in order to check the (fake) email send by the web-app.
 
 ## Screenshots
-<img src="docs/images/screenshot_1.gif" width="400">
+<img src="docs/images/screenshot_1.gif" width="700">
